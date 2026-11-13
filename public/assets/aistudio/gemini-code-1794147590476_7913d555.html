@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>SUMMARY ELECTRICAL SYSTEM - SILA1 (FULL PACKAGE)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: #2b2b2b; color: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        /* Top Header */
+        .top-header { background: #1e1e1e; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #444; }
+        .brand { display: flex; align-items: center; gap: 10px; }
+        .logo-red { background: #b30000; color: white; padding: 5px 10px; font-weight: bold; border-radius: 3px; font-size: 14px; }
+        .title-text { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+
+        .status-counters { display: flex; gap: 8px; }
+        .counter-badge { padding: 4px 10px; border-radius: 3px; font-weight: bold; font-size: 11px; text-align: center; border: 1px solid #555; }
+        .c-crit { background: #ff4d4d; color: #000; }
+        .c-maj { background: #ffaa00; color: #000; }
+        .c-min { background: #ffff00; color: #000; }
+        .c-warn { background: #00cccc; color: #000; }
+
+        /* Sub-bar */
+        .sub-bar { background: #3c3c3c; padding: 8px 20px; display: flex; gap: 15px; align-items: center; border-bottom: 1px solid #555; font-size: 12px; }
+        .sub-btn { background: #555; border: none; color: #fff; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+        .sub-btn.active { background: #007acc; }
+
+        /* Workspace Grid */
+        .workspace { flex: 1; padding: 15px 20px; background: #333; display: flex; flex-direction: column; gap: 15px; overflow: auto; }
+        .section-title { font-size: 12px; color: #aaa; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 3px; margin-bottom: 6px; text-transform: uppercase; }
+        
+        /* Grid Layouts */
+        .grid-container { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        /* Node Component */
+        .node-box { width: 95px; height: 45px; background: #222; border: 2px solid #00cc44; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+        .node-box.normal { background: #153319; border-color: #00cc44; color: #00ff66; }
+        .node-box.tripped { background: #4a1c1c; border-color: #ff4d4d; color: #ff9999; animation: pulse 1s infinite; }
+        .node-box.standby { background: #2d2d15; border-color: #cccc00; color: #ffff66; }
+        
+        .node-box .name { font-size: 11px; font-weight: bold; }
+        .node-box .status { font-size: 8.5px; color: #ccc; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Realtime Dashboard Panel */
+        .dashboard-panel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 5px; }
+        .dash-card { background: #222; border: 1px solid #444; border-radius: 4px; padding: 8px 12px; display: flex; flex-direction: column; }
+        .dash-title { font-size: 10px; color: #888; text-transform: uppercase; }
+        .dash-value { font-size: 16px; font-weight: bold; color: #00ffcc; font-family: monospace; margin-top: 2px; }
+
+        /* Output / Event Log Panel */
+        .output-panel { height: 110px; background: #111; border-top: 2px solid #444; padding: 8px 20px; overflow-y: auto; font-family: monospace; font-size: 11.5px; color: #00ffcc; }
+        .output-panel h4 { color: #fff; margin-bottom: 3px; font-size: 11px; font-family: 'Segoe UI'; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="brand">
+            <div class="logo-red">FXL Fa x Lite</div>
+            <span class="title-text">SILA1 - ELECTRICAL SIMULATOR (FULL PACKAGE)</span>
+        </div>
+        <div class="status-counters">
+            <div class="counter-badge c-crit" id="cnt-crit">CRITICAL: 00</div>
+            <div class="counter-badge c-maj" id="cnt-maj">MAJOR: 00</div>
+            <div class="counter-badge c-min">MINOR: 00</div>
+            <div class="counter-badge c-warn">WARNING: 00</div>
+        </div>
+    </div>
+
+    <!-- Sub-bar -->
+    <div class="sub-bar">
+        <span>SUMMARY ▼</span>
+        <button class="sub-btn active">EE SUMMARY</button>
+        <button class="sub-btn">AC SUMMARY</button>
+        <span>| DIAGRAM ▼</span>
+        <button class="sub-btn">OVERVIEW</button>
+        <button class="sub-btn" onclick="resetAll()">RESET ALL</button>
+    </div>
+
+    <!-- Workspace Layout -->
+    <div class="workspace">
+        <!-- Realtime Telemetry Dashboard -->
+        <div>
+            <div class="section-title">Live Telemetry & Real-Time Load Monitor</div>
+            <div class="dashboard-panel">
+                <div class="dash-card">
+                    <span class="dash-title">System Voltage (L-L)</span>
+                    <span class="dash-value" id="val-volt">380.5 V</span>
+                </div>
+                <div class="dash-card">
+                    <span class="dash-title">Total Current (RMS)</span>
+                    <span class="dash-value" id="val-curr">1,245.2 A</span>
+                </div>
+                <div class="dash-card">
+                    <span class="dash-title">Transformer Load</span>
+                    <span class="dash-value" id="val-load">78.4 %</span>
+                </div>
+                <div class="dash-card">
+                    <span class="dash-title">Frequency</span>
+                    <span class="dash-value" id="val-freq">50.0 Hz</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Source Group: HV, Transformer, Generator -->
+        <div>
+            <div class="section-title">Source Group (HV / Transformer / Generator)</div>
+            <div class="grid-container">
+                <div class="node-box normal" id="src-hv" onclick="toggleSource('src-hv', 'High Voltage (PEA/MEG)')">
+                    <span class="name">HV Feed</span><span class="status">ONLINE</span>
+                </div>
+                <div class="node-box normal" id="tr-1" onclick="toggleSource('tr-1', 'Transformer TR-1')">
+                    <span class="name">TR-1 (2500kVA)</span><span class="status">ACTIVE</span>
+                </div>
+                <div class="node-box normal" id="tr-2" onclick="toggleSource('tr-2', 'Transformer TR-2')">
+                    <span class="name">TR-2 (2500kVA)</span><span class="status">ACTIVE</span>
+                </div>
+                <div class="node-box standby" id="gen-1" onclick="toggleSource('gen-1', 'Emergency Generator GEN-1')">
+                    <span class="name">GEN-1</span><span class="status">STANDBY</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MDB Group -->
+        <div>
+            <div class="section-title">MDB Group (คลิกเพื่อทดสอบการตัดวงจร / Trip)</div>
+            <div class="grid-container">
+                <div class="node-box normal" id="mdb-1b" onclick="toggleMDB('mdb-1b', 'MDB1B', ['ats-1b'])">
+                    <span class="name">MDB1B</span><span class="status">NORMAL</span>
+                </div>
+                <div class="node-box normal" id="mdb-1a" onclick="toggleMDB('mdb-1a', 'MDB1A', ['ats-1a'])">
+                    <span class="name">MDB1A</span><span class="status">NORMAL</span>
+                </div>
+                <div class="node-box normal" id="mdb-2b" onclick="toggleMDB('mdb-2b', 'MDB2B', ['ats-2b'])">
+                    <span class="name">MDB2B</span><span class="status">NORMAL</span>
+                </div>
+                <div class="node-box normal" id="mdb-2a" onclick="toggleMDB('mdb-2a', 'MDB2A', ['ats-2a'])">
+                    <span class="name">MDB2A</span><span class="status">NORMAL</span>
+                </div>
+                <div class="node-box normal" id="mdb-3b" onclick="toggleMDB('mdb-3b', 'MDB3B', ['ats-3b'])">
+                    <span class="name">MDB3B</span><span class="status">NORMAL</span>
+                </div>
+                <div class="node-box normal" id="mdb-3a" onclick="toggleMDB('mdb-3a', 'MDB3A', ['ats-3a'])">
+                    <span class="name">MDB3A</span><span class="status">NORMAL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ATS Group -->
+        <div>
+            <div class="section-title">ATS Group (เปลี่ยนสถานะอัตโนมัติตาม MDB ต้นทาง)</div>
+            <div class="grid-container">
+                <div class="node-box normal" id="ats-1b"><span class="name">ATS1B</span><span class="status">SYNC OK</span></div>
+                <div class="node-box normal" id="ats-1a"><span class="name">ATS1A</span><span class="status">SYNC OK</span></div>
+                <div class="node-box normal" id="ats-2b"><span class="name">ATS2B</span><span class="status">SYNC OK</span></div>
+                <div class="node-box normal" id="ats-2a"><span class="name">ATS2A</span><span class="status">SYNC OK</span></div>
+                <div class="node-box normal" id="ats-3b"><span class="name">ATS3B</span><span class="status">SYNC OK</span></div>
+                <div class="node-box normal" id="ats-3a"><span class="name">ATS3A</span><span class="status">SYNC OK</span></div>
+                <div class="node-box normal" id="atsp-22"><span class="name">ATSP22</span><span class="status">SYNC OK</span></div>
+                <div class="node-box normal" id="atsp-26"><span class="name">ATSP26</span><span class="status">SYNC OK</span></div>
+                <div class="node-box normal" id="atsp-23"><span class="name">ATSP23</span><span class="status">SYNC OK</span></div>
+                <div class="node-box normal" id="atsp-27"><span class="name">ATSP27</span><span class="status">SYNC OK</span></div>
+                <div class="node-box normal" id="atsp-24"><span class="name">ATSP24</span><span class="status">SYNC OK</span></div>
+                <div class="node-box normal" id="atsp-31"><span class="name">ATSP31</span><span class="status">SYNC OK</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Output Event Log -->
+    <div class="output-panel">
+        <h4>System Logic & Interconnection Output Log:</h4>
+        <div id="log-box">[System Ready] ระบบไฟฟ้าสมบูรณ์พร้อมจำลองเหตุการณ์ แหล่งจ่ายไฟฟ้าและมิเตอร์โหลดเริ่มทำงานแล้ว</div>
+    </div>
+
+    <script>
+        const mdbStates = {
+            'mdb-1b': false, 'mdb-1a': false,
+            'mdb-2b': false, 'mdb-2a': false,
+            'mdb-3b': false, 'mdb-3a': false
+        };
+
+        const sourceStates = {
+            'src-hv': false, 'tr-1': false, 'tr-2': false, 'gen-1': true
+        };
+
+        function toggleMDB(mdbId, mdbName, linkedAtsIds) {
+            mdbStates[mdbId] = !mdbStates[mdbId];
+            const mdbNode = document.getElementById(mdbId);
+            const logBox = document.getElementById('log-box');
+            const timeStr = new Date().toLocaleTimeString();
+
+            if (mdbStates[mdbId]) {
+                mdbNode.className = "node-box tripped";
+                mdbNode.querySelector('.status').innerText = "TRIPPED!";
+                
+                linkedAtsIds.forEach(atsId => {
+                    let atsEl = document.getElementById(atsId);
+                    if(atsEl) {
+                        atsEl.className = "node-box tripped";
+                        atsEl.querySelector('.status').innerText = "POWER LOST";
+                    }
+                });
+
+                logBox.innerHTML = `[${timeStr}] 🔴 CRITICAL: ${mdbName}
